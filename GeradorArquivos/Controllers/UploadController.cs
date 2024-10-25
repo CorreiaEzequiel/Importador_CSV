@@ -42,25 +42,23 @@ namespace GeradorArquivos.Controllers
                     var csvCabecalho = new CsvReader(stream, new CsvConfiguration(CultureInfo.InvariantCulture)
                     {
                         Delimiter = ",",
-                        HeaderValidated = null, // Ignora validação de cabeçalhos
-                        MissingFieldFound = null, // Ignora campos faltantes
-                        HasHeaderRecord = true // Certifica-se de que a primeira linha é cabeçalho
+                        HeaderValidated = null, 
+                        MissingFieldFound = null, 
+                        HasHeaderRecord = true 
                     });
 
-                    // Leitura dos cabeçalhos
-                    csvCabecalho.Read(); // Move para a primeira linha
-                    csvCabecalho.ReadHeader(); // Lê os cabeçalhos
+                   
+                    csvCabecalho.Read(); 
+                    csvCabecalho.ReadHeader(); 
 
                     var cabecalhos = csvCabecalho.Context.Reader.HeaderRecord;
 
-                    // Verifica se os cabeçalhos foram lidos corretamente
                     if (cabecalhos == null || !cabecalhos.Any())
                     {
                         ViewBag.Message = "Cabeçalhos do arquivo CSV não foram encontrados.";
                         return View("Index");
                     }
 
-                    // Verifica se é arquivo de clientes
                     if (cabecalhos.Contains("Nome") && cabecalhos.Contains("Email") && cabecalhos.Contains("Cpf"))
                     {
                         var clientes = csvCabecalho.GetRecords<Cliente>().ToList();
@@ -73,7 +71,6 @@ namespace GeradorArquivos.Controllers
 
                         _contexto.Clientes.AddRange(clientes);
                     }
-                    // Verifica se é arquivo de produtos
                     else if (cabecalhos.Contains("Descricao") && cabecalhos.Contains("Preco") && cabecalhos.Contains("Categoria"))
                     {
                         var produtos = csvCabecalho.GetRecords<Produto>().ToList();
