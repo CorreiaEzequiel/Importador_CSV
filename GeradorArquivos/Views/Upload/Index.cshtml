@@ -1,19 +1,183 @@
-﻿@{
-    ViewData["Title"] = "Upload CSV";
-}
+﻿<form method="post" enctype="multipart/form-data" asp-action="UploadArquivo">
+    <div class="card shadow-lg p-4 mb-4 rounded">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Upload de Arquivo CSV</h3>
+        </div>
+        <div class="card-body">
+            <!-- Escolha da Tabela -->
+            <div class="form-group">
+                <label for="tabela" class="font-weight-bold">Escolha uma Tabela</label>
+                <select class="form-control" name="tabela" id="tabela" onchange="atualizarInstrucoes()">
+                    <option value="">Selecione uma tabela</option>
+                    @foreach (var tabela in ViewBag.Tabelas as List<string>)
+                    {
+                        <option value="@tabela">@tabela</option>
+                    }
+                </select>
+            </div>
 
-<h2>Upload CSV</h2>
+           
+            <input type="hidden" id="tabelaSelecionada" name="tabelaSelecionada" value="" />
 
-<form method="post" enctype="multipart/form-data" asp-action="UploadArquivo">
-    
-    <div class="form-group">
-        <label for="file">Selecione o arquivo CSV</label>
-        <input type="file" class="form-control" name="file" required />
+           
+            <div id="tabelaSelecionadaDiv" style="display:none;">
+               
+                <div id="instrucoes" class="form-group mb-4">
+                   
+                </div>
+
+               
+                <div id="colunasGrid" class="form-group mb-4">
+                   
+                </div>
+
+                
+                <div class="form-group">
+                    <label for="file" class="font-weight-bold">Selecione o Arquivo CSV</label>
+                    <input type="file" class="form-control-file" name="file" required />
+                </div>
+
+                <button type="submit" class="btn btn-success btn-lg w-100">Upload</button>
+            </div>
+        </div>
     </div>
-    <button type="submit" class="btn btn-primary">Upload</button>
 </form>
+<style>
+    /* Estilo do card */
+    .card {
+        max-width: 700px;
+        margin: 0 auto;
+        border-radius: 15px;
+    }
 
-@if (ViewBag.Message != null)
-{
-    <div class="alert alert-info">@ViewBag.Message</div>
-}
+    /* Título do card */
+    .card-header {
+        font-size: 1.5rem;
+        text-align: center;
+        padding: 20px;
+    }
+
+    /* Formulário */
+    .form-group label {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    /* Botões */
+    .btn {
+        padding: 10px 20px;
+        font-size: 1.2rem;
+        border-radius: 25px;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+    /* Estilo das colunas da tabela */
+    .table-striped td {
+        padding: 12px;
+        font-size: 1.1rem;
+    }
+
+    /* Efeitos de transição */
+    .form-group input, .form-group select {
+        transition: border-color 0.3s ease-in-out;
+    }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+        }
+
+    /* Tabela de colunas */
+    .table-striped {
+        margin-top: 20px;
+    }
+
+    .card-body {
+        padding: 30px;
+    }
+</style>
+
+<script>
+   
+    function atualizarInstrucoes() {
+        var tabelaSelecionada = document.getElementById("tabela").value;
+        document.getElementById("tabelaSelecionada").value = tabelaSelecionada;
+
+       
+        if (!tabelaSelecionada) {
+            document.getElementById("tabelaSelecionadaDiv").style.display = "none";
+            return;
+        }
+
+        
+        document.getElementById("tabelaSelecionadaDiv").style.display = "block";
+
+        
+        var instrucoes = '';
+        switch (tabelaSelecionada) {
+            case 'Clientes':
+                instrucoes = 'Por favor, insira um arquivo CSV com as colunas: Nome, Email, Cpf.';
+                break;
+            case 'Produtos':
+                instrucoes = 'Por favor, insira um arquivo CSV com as colunas: Descricao, Preco, Categoria.';
+                break;
+            case 'NotasFiscais':
+                instrucoes = 'Por favor, insira um arquivo CSV com as colunas: Numero, Data, Valor.';
+                break;
+            default:
+                instrucoes = 'Selecione uma tabela para ver as instruções.';
+        }
+
+        
+        document.getElementById("instrucoes").innerHTML = '<p>' + instrucoes + '</p>';
+
+        
+        carregarColunas(tabelaSelecionada);
+    }
+
+    
+    function carregarColunas(tabela) {
+        fetch('/Home/ListarColunas?tabela=' + tabela)
+            .then(response => response.json())
+            .then(colunas => {
+                var grid = document.getElementById("colunasGrid");
+                grid.innerHTML = ''; // Limpa as colunas anteriores
+
+                if (colunas.length > 0) {
+                    var table = document.createElement("table");
+                    table.className = "table table-striped";
+
+                    var thead = document.createElement("thead");
+                    var tbody = document.createElement("tbody");
+
+                    var headerRow = document.createElement("tr");
+                    var headerCell = document.createElement("th");
+                    headerCell.colSpan = 2;
+                    headerCell.textContent = "Colunas da Tabela";
+                    headerRow.appendChild(headerCell);
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+
+                    colunas.forEach(function (coluna) {
+                        var row = document.createElement("tr");
+                        var cell = document.createElement("td");
+                        cell.textContent = coluna;
+                        row.appendChild(cell);
+                        tbody.appendChild(row);
+                    });
+
+                    table.appendChild(tbody);
+                    grid.appendChild(table);
+                } else {
+                    grid.innerHTML = "<p>Nenhuma coluna encontrada para esta tabela.</p>";
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao carregar colunas:', error);
+            });
+    }
+</script>

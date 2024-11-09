@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GeradorArquivos")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3d8f5f5f4c6db4c01bae074a5c0794df9a82a938")]
 [assembly: System.Reflection.AssemblyProductAttribute("GeradorArquivos")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GeradorArquivos")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

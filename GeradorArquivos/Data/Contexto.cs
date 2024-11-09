@@ -13,6 +13,18 @@ namespace GeradorArquivos.Data
         public DbSet<NotaFiscal> NotasFiscais { get; set; }
         public DbSet<NotaFiscalProduto> NotaFiscalProdutos { get; set; }
 
+        public List<string> ListarTabeles()
+        {
+            var tabelas = this.Database.SqlQueryRaw<string>("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'").ToList();
+            return tabelas;
+        }
+        public List<string> ListarColunas(string tabelas)
+        {
+            var colunas = this.Database.SqlQuery<string>($"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{tabelas}'").ToList();
+
+            return colunas;
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

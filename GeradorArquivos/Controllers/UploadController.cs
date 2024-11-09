@@ -21,14 +21,37 @@ namespace GeradorArquivos.Controllers
             _contexto = contexto;
         }
 
+        //public IActionResult Index()
+        //{
+        //    using (var contexto = _contexto.CreateDbContext())
+        //    {
+        //        ViewBag.Tabelas = tabelas;
+        //    }
+        //    return View();
+        //}
+
         public IActionResult Index()
         {
+            var tabelas = _contexto.ListarTabeles();
+            ViewBag.Tabelas = tabelas;
             return View();
+        }
+        public JsonResult ListarColunas(string tabelas)
+        {
+            var colunas = _contexto.Database.SqlQuery<string>($"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{tabelas}'").ToList();
+
+            return Json(colunas);
         }
 
         [HttpPost]
-        public async Task<ActionResult> UploadArquivo(IFormFile file)
+        public async Task<ActionResult> UploadArquivo(IFormFile file, string tabela)
         {
+            if (string.IsNullOrEmpty(tabela))
+            {
+                ViewBag.Message = "Selecione uma tabela!";
+                return View("Index");
+            }
+
             if (file == null || file.Length == 0)
             {
                 ViewBag.Message = "Insira um arquivo CSV!";
